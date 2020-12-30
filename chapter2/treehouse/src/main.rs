@@ -1,21 +1,42 @@
 use std::io::stdin;
 
 #[derive(Debug)]
+enum VisitorAction {
+    Accept,
+    AcceptWithNote { note: String },
+    Refuse,
+    Probation,
+}
+
+#[derive(Debug)]
 struct Visitor {
     name: String,
-    greeting: String
+    action: VisitorAction,
+    age: i8
 }
 
 impl Visitor {
-    fn new(name: &str, greeting: &str) -> Self {
+    fn new(name: &str, action: VisitorAction, age: i8) -> Self {
         Self {
             name: name.to_lowercase(),
-            greeting: greeting.to_string()
+            action,
+            age
         }
     }
 
     fn greet_visitor(&self) {
-        println!("{}", self.greeting);
+        match &self.action {
+            VisitorAction::AcceptWithNote { note } => {
+                println!("Welcome to the treehouse {}", self.name);
+                println!("{}", note);
+                if self.age < 21 {
+                    println!("No alcohol for you {}", self.name)
+                }
+            }
+            VisitorAction::Accept => println!("Welcome to the treehouse {}", self.name),
+            VisitorAction::Probation => println!("{} is now a probationary member", self.name),
+            VisitorAction::Refuse => println!("Sorry {} no access for you", self.name)
+        }
     }
 }
 
@@ -31,10 +52,10 @@ fn what_is_your_name() -> String {
 
 fn main() {
     let mut visitor_list = vec![
-        Visitor::new("Ask", "Hello there Ask"),
-        Visitor::new("Freja", "Welcome Freja"),
-        Visitor::new("Pia", "Hi Pia"),
-        Visitor::new("Peter", "Good day Peter")
+        Visitor::new("Ask", VisitorAction::Probation, 12),
+        Visitor::new("Freja", VisitorAction::AcceptWithNote { note: String::from("Note here") }, 16),
+        Visitor::new("Pia", VisitorAction::Refuse, 45),
+        Visitor::new("Peter", VisitorAction::Accept, 46)
     ];
 
     loop {
@@ -52,9 +73,7 @@ fn main() {
                     break;
                 } else {
                     println!("Hey {}, no access for you buddy", name);
-                    let mut greeting = String::from("Welcome ");
-                    greeting.push_str(&name);
-                    visitor_list.push(Visitor::new(&name, &greeting));
+                    visitor_list.push(Visitor::new(&name, VisitorAction::Probation, 0));
                 }
             }
         }           
